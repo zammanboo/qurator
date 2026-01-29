@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
+from pydantic import BaseModel
 from app.db.database import get_db
-from app.models.models import User, Category, ContentItem, ContentClick
+from app.models.models import User, Category, ContentItem, ContentClick, CategoryGroup
 from app.schemas.schemas import (
     User as UserSchema,
     Category as CategorySchema,
@@ -17,6 +18,10 @@ from app.services.auth_service import get_current_admin
 from app.services.youtube import extract_video_id, get_video_metadata
 
 router = APIRouter()
+
+class CategoryOrder(BaseModel):
+    id: int
+    order: int
 
 # User Management
 @router.get("/users", response_model=List[UserSchema])
@@ -245,6 +250,39 @@ async def delete_content(
     return None
 
 
+@router.post("/content/reorder")
+async def reorder_content(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Update content item orders (admin only)"""
+    orders = await request.json()
+    for item in orders:
+        content = db.query(ContentItem).filter(ContentItem.id == item["id"]).first()
+        if content:
+            content.order = item["order"]
+    db.commit()
+    return {"message": "Content reordered successfully"}
+
+
+@router.patch("/content/{content_id}/toggle-active")
+async def toggle_content_active(
+    content_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Toggle content active status"""
+    content = db.query(ContentItem).filter(ContentItem.id == content_id).first()
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found")
+    
+    content.is_active = not content.is_active
+    db.commit()
+    db.refresh(content)
+    return content
+
+
 # User History Management
 @router.get("/users/{user_id}/history")
 async def get_user_history(
@@ -311,3 +349,143 @@ async def get_history_stats(
         }
         for s in stats
     ]
+
+
+@router.post("/categories/reorder")
+async def reorder_categories(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Update category orders (admin only)"""
+    orders = await request.json()
+    for item in orders:
+        category = db.query(Category).filter(Category.id == item["id"]).first()
+        if category:
+            category.order = item["order"]
+    db.commit()
+    return {"message": "Categories reordered successfully"}
+
+
+@router.patch("/categories/{category_id}/toggle-active")
+async def toggle_category_active(
+    category_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Toggle category active status"""
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    category.is_active = not category.is_active
+    db.commit()
+    db.refresh(category)
+    return category
+
+
+# Category Group Management
+@router.get("/groups")
+async def get_all_groups(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Get all category groups (admin only)"""
+    groups = db.query(CategoryGroup).order_by(CategoryGroup.order).all()
+    result = []
+    for group in groups:
+        categories = db.query(Category).filter(Category.group_id == group.id).order_by(Category.order).all()
+        result.append({
+            "id": group.id,
+            "name": group.name,
+            "slug": group.slug,
+            "icon": group.icon,
+            "order": group.order,
+            "is_active": group.is_active,
+            "categories": [{"id": c.id, "name": c.name, "slug": c.slug, "icon": c.icon} for c in categories]
+        })
+    return result
+
+@router.post("/groups")
+async def create_group(
+    name: str,
+    slug: str,
+    icon: str = None,
+    order: int = 0,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Create a new category group"""
+    group = CategoryGroup(name=name, slug=slug, icon=icon, order=order)
+    db.add(group)
+    db.commit()
+    db.refresh(group)
+    return group
+
+@router.patch("/groups/{group_id}")
+async def update_group(
+    group_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Update a category group"""
+    group = db.query(CategoryGroup).filter(CategoryGroup.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    data = await request.json()
+    for key, value in data.items():
+        if hasattr(group, key):
+            setattr(group, key, value)
+    db.commit()
+    db.refresh(group)
+    return group
+
+@router.delete("/groups/{group_id}")
+async def delete_group(
+    group_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Delete a category group"""
+    group = db.query(CategoryGroup).filter(CategoryGroup.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    # Set categories' group_id to null
+    db.query(Category).filter(Category.group_id == group_id).update({"group_id": None})
+    db.delete(group)
+    db.commit()
+    return {"message": "Group deleted"}
+
+@router.patch("/groups/{group_id}/toggle-active")
+async def toggle_group_active(
+    group_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Toggle group active status"""
+    group = db.query(CategoryGroup).filter(CategoryGroup.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    group.is_active = not group.is_active
+    db.commit()
+    db.refresh(group)
+    return group
+
+@router.post("/groups/reorder")
+async def reorder_groups(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Update group orders"""
+    orders = await request.json()
+    for item in orders:
+        group = db.query(CategoryGroup).filter(CategoryGroup.id == item["id"]).first()
+        if group:
+            group.order = item["order"]
+    db.commit()
+    return {"message": "Groups reordered"}

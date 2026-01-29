@@ -22,6 +22,7 @@ class Category(Base):
     __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("category_groups.id"), nullable=True)
     name = Column(String, unique=True, nullable=False)
     slug = Column(String, unique=True, nullable=False, index=True)
     description = Column(Text)
@@ -31,6 +32,7 @@ class Category(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    group = relationship("CategoryGroup", back_populates="categories")
     content_items = relationship("ContentItem", back_populates="category")
 
 class ContentItem(Base):
@@ -63,3 +65,17 @@ class ContentClick(Base):
 
     user = relationship("User")
     content = relationship("ContentItem", back_populates="clicks")
+
+
+class CategoryGroup(Base):
+    __tablename__ = "category_groups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    slug = Column(String, unique=True, nullable=False, index=True)
+    icon = Column(String)
+    order = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    categories = relationship("Category", back_populates="group")

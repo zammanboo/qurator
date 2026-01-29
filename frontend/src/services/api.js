@@ -61,6 +61,10 @@ export const contentAPI = {
   getUserHistory: () => api.get('/api/content/user/history'),
 }
 
+export const groupsAPI = {
+  getAll: () => api.get('/api/categories/groups/'),
+}
+
 export const adminAPI = {
   // Users
   getUsers: () => api.get('/api/admin/users'),
@@ -72,16 +76,28 @@ export const adminAPI = {
   createCategory: (data) => api.post('/api/admin/categories', data),
   updateCategory: (id, data) => api.patch(`/api/admin/categories/${id}`, data),
   deleteCategory: (id) => api.delete(`/api/admin/categories/${id}`),
+  reorderCategories: (orders) => api.post('/api/admin/categories/reorder', orders),
+  toggleCategoryActive: (id) => api.patch(`/api/admin/categories/${id}/toggle-active`),
 
   // Content
   getContent: () => api.get('/api/admin/content'),
   createContent: (data) => api.post('/api/admin/content', data),
   updateContent: (id, data) => api.patch(`/api/admin/content/${id}`, data),
   deleteContent: (id) => api.delete(`/api/admin/content/${id}`),
+  reorderContent: (orders) => api.post('/api/admin/content/reorder', orders),
+  toggleContentActive: (id) => api.patch(`/api/admin/content/${id}/toggle-active`),
 
   // User History
   getHistoryStats: () => api.get('/api/admin/history/stats'),
   getUserHistory: (userId) => api.get(`/api/admin/users/${userId}/history`),
+
+  // Category Groups
+  getGroups: () => api.get('/api/admin/groups'),
+  createGroup: (data) => api.post('/api/admin/groups', null, { params: data }),
+  updateGroup: (id, data) => api.patch(`/api/admin/groups/${id}`, data),
+  deleteGroup: (id) => api.delete(`/api/admin/groups/${id}`),
+  toggleGroupActive: (id) => api.patch(`/api/admin/groups/${id}/toggle-active`),
+  reorderGroups: (orders) => api.post('/api/admin/groups/reorder', orders),
 }
 
 export default api

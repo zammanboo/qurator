@@ -48,6 +48,7 @@ class CategoryBase(BaseModel):
     icon: Optional[str] = None
     order: int = 0
     is_active: bool = True
+    group_id: Optional[int] = None
 
 class CategoryCreate(CategoryBase):
     pass
@@ -59,6 +60,7 @@ class CategoryUpdate(BaseModel):
     icon: Optional[str] = None
     order: Optional[int] = None
     is_active: Optional[bool] = None
+    group_id: Optional[int] = None
 
 class Category(CategoryBase):
     id: int
@@ -111,3 +113,32 @@ class CategoryWithContent(Category):
 
     class Config:
         from_attributes = True
+
+
+# Category Group schemas
+class CategoryGroupBase(BaseModel):
+    name: str
+    slug: str
+    icon: Optional[str] = None
+    order: int = 0
+    is_active: bool = True
+
+class CategoryGroupCreate(CategoryGroupBase):
+    pass
+
+class CategoryGroupUpdate(BaseModel):
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    icon: Optional[str] = None
+    order: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class CategoryGroup(CategoryGroupBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CategoryGroupWithCategories(CategoryGroup):
+    categories: List['Category'] = []

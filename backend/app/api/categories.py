@@ -38,3 +38,48 @@ async def get_category_by_slug(slug: str, db: Session = Depends(get_db)):
             detail="Category not found"
         )
     return category
+
+
+@router.get("/groups/", response_model=None)
+async def get_category_groups(db: Session = Depends(get_db)):
+    """Get all active category groups with their categories for sidebar"""
+    from app.models.models import CategoryGroup
+    
+    groups = db.query(CategoryGroup).filter(CategoryGroup.is_active == True).order_by(CategoryGroup.order).all()
+    result = []
+    for group in groups:
+        categories = db.query(Category).filter(
+            Category.group_id == group.id,
+            Category.is_active == True
+        ).order_by(Category.order).all()
+        
+        result.append({
+            "id": group.id,
+            "name": group.name,
+            "slug": group.slug,
+            "icon": group.icon,
+            "categories": [
+                {"id": c.id, "name": c.name, "slug": c.slug, "icon": c.icon}
+                for c in categories
+            ]
+        })
+    
+    # Also get ungrouped categories
+    ungrouped = db.query(Category).filter(
+        Category.group_id == None,
+        Category.is_active == True
+    ).order_by(Category.order).all()
+    
+    if ungrouped:
+        result.append({
+            "id": None,
+            "name": "기타",
+            "slug": "etc",
+            "icon": "📁",
+            "categories": [
+                {"id": c.id, "name": c.name, "slug": c.slug, "icon": c.icon}
+                for c in ungrouped
+            ]
+        })
+    
+    return result
