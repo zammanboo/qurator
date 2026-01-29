@@ -9,19 +9,21 @@ import CategoryView from './pages/CategoryView'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
 import MFASetup from './pages/MFASetup'
+import MyHistory from './pages/MyHistory'
+import Search from './pages/Search'
 
-function ProtectedRoute({ children, adminOnly = false }) {
+function ProtectedRoute({ children, adminOnly = false, allowGuest = false }) {
   const { user, loading } = useAuth()
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>
   }
 
-  if (!user) {
+  if (!user && !allowGuest) {
     return <Navigate to="/login" />
   }
 
-  if (adminOnly && !user.is_admin) {
+  if (adminOnly && (!user || !user.is_admin)) {
     return <Navigate to="/" />
   }
 
@@ -36,18 +38,28 @@ function App() {
 
       <Route path="/" element={<Layout />}>
         <Route index element={
-          <ProtectedRoute>
+          <ProtectedRoute allowGuest>
             <Home />
           </ProtectedRoute>
         } />
         <Route path="category/:slug" element={
-          <ProtectedRoute>
+          <ProtectedRoute allowGuest>
             <CategoryView />
+          </ProtectedRoute>
+        } />
+        <Route path="search" element={
+          <ProtectedRoute allowGuest>
+            <Search />
           </ProtectedRoute>
         } />
         <Route path="profile" element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="history" element={
+          <ProtectedRoute>
+            <MyHistory />
           </ProtectedRoute>
         } />
         <Route path="mfa-setup" element={

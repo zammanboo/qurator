@@ -59,6 +59,7 @@ export const contentAPI = {
   recordClick: (id) => api.post(`/api/content/${id}/click`),
   getClickStats: (id) => api.get(`/api/content/${id}/clicks`),
   getUserHistory: () => api.get('/api/content/user/history'),
+  search: (query) => api.get('/api/content/search/', { params: { q: query } }),
 }
 
 export const groupsAPI = {

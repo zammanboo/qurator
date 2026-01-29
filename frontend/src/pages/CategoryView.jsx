@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { categoriesAPI, contentAPI, adminAPI } from '../services/api'
+import { categoriesAPI, contentAPI, adminAPI, groupsAPI } from '../services/api'
 import { toast } from 'react-toastify'
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 
 function CategoryView() {
   const { slug } = useParams()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [category, setCategory] = useState(null)
   const [content, setContent] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [accessDenied, setAccessDenied] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [formData, setFormData] = useState({ youtube_url: '', title: '', description: '', order: 0 })
@@ -19,25 +21,42 @@ function CategoryView() {
 
   const handleVideoClick = async (item) => {
     setSelectedVideo(item)
-    // Record click
-    try {
-      await contentAPI.recordClick(item.id)
-      // Update local click count
-      setContent(prev => prev.map(c => 
-        c.id === item.id ? { ...c, click_count: (c.click_count || 0) + 1 } : c
-      ))
-    } catch (err) {
-      console.error('Failed to record click:', err)
+    // Record click only if logged in
+    if (user) {
+      try {
+        await contentAPI.recordClick(item.id)
+        // Update local click count
+        setContent(prev => prev.map(c => 
+          c.id === item.id ? { ...c, click_count: (c.click_count || 0) + 1 } : c
+        ))
+      } catch (err) {
+        console.error('Failed to record click:', err)
+      }
     }
   }
 
   useEffect(() => {
     fetchCategoryAndContent()
-  }, [slug])
+  }, [slug, user])
 
   const fetchCategoryAndContent = async () => {
     try {
       setLoading(true)
+      setAccessDenied(false)
+      
+      // 비로그인 시 첫 번째 그룹 카테고리만 허용
+      if (!user) {
+        const groupsResponse = await groupsAPI.getAll()
+        const firstGroup = groupsResponse.data[0]
+        const allowedSlugs = firstGroup?.categories?.map(c => c.slug) || []
+        
+        if (!allowedSlugs.includes(slug)) {
+          setAccessDenied(true)
+          setLoading(false)
+          return
+        }
+      }
+      
       const categoryResponse = await categoriesAPI.getBySlug(slug)
       setCategory(categoryResponse.data)
       
@@ -80,6 +99,35 @@ function CategoryView() {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    )
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="text-center py-12">
+        <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+          <LockClosedIcon className="w-16 h-16 text-indigo-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">로그인이 필요합니다</h2>
+          <p className="text-gray-600 mb-6">
+            이 카테고리의 콘텐츠를 보려면 로그인이 필요합니다.
+            <br />로그인하면 모든 콘텐츠를 자유롭게 즐길 수 있어요!
+          </p>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
+            >
+              로그인하기
+            </button>
+            <Link
+              to="/"
+              className="block w-full px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition"
+            >
+              홈으로 돌아가기
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }

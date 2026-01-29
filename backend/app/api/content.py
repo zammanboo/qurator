@@ -24,6 +24,27 @@ async def get_content_items(
     content_items = query.order_by(ContentItem.order).offset(skip).limit(limit).all()
     return content_items
 
+
+@router.get("/search/", response_model=List[ContentItemSchema])
+async def search_content(
+    q: str,
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    """Search content items by title or description"""
+    if not q or len(q.strip()) < 1:
+        return []
+    
+    search_term = f"%{q.strip()}%"
+    query = db.query(ContentItem).filter(
+        ContentItem.is_active == True,
+        (ContentItem.title.ilike(search_term) | ContentItem.description.ilike(search_term))
+    )
+    
+    content_items = query.order_by(ContentItem.click_count.desc()).offset(skip).limit(limit).all()
+    return content_items
+
 @router.get("/{content_id}", response_model=ContentItemSchema)
 async def get_content_item(content_id: int, db: Session = Depends(get_db)):
     """Get content item by ID"""
