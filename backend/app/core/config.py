@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str
 
     # CORS
-    FRONTEND_URL: str = "http://localhost:3000"
+    FRONTEND_URL: str = "http://localhost:8080"
 
     class Config:
         env_file = ".env"
