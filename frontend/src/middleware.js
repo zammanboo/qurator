@@ -10,6 +10,7 @@ export function middleware(request) {
   if (originalHost === 'zubu9dan.com' || originalHost?.startsWith('zubu9dan.com:')) {
     const url = new URL(request.url)
     url.hostname = 'www.zubu9dan.com'
+    url.port = '' // Remove internal port (Firebase uses 8080 internally)
     return NextResponse.redirect(url.toString(), 301)
   }
 
