@@ -15,7 +15,9 @@ app = FastAPI(title=settings.APP_NAME, redirect_slashes=False)
 # CORS configuration - allow multiple origins
 allowed_origins = [
     settings.FRONTEND_URL,
-    "https://qurator--zubu9dan-1baf2.us-east4.hosted.app",
+    "https://zubu9dan.com",
+    "https://www.zubu9dan.com",
+    "https://qurator--zubu9dan-1baf2.asia-east1.hosted.app",
     "http://localhost:3000",
     "http://localhost:8080",
 ]
