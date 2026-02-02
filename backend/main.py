@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 from app.core.config import settings
 from app.api import auth, categories, content, admin, users
 from app.db.database import engine
@@ -7,12 +9,20 @@ from app.models import models
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title=settings.APP_NAME)
+# Disable automatic trailing slash redirects
+app = FastAPI(title=settings.APP_NAME, redirect_slashes=False)
 
-# CORS configuration
+# CORS configuration - allow multiple origins
+allowed_origins = [
+    settings.FRONTEND_URL,
+    "https://qurator--zubu9dan-1baf2.us-east4.hosted.app",
+    "http://localhost:3000",
+    "http://localhost:8080",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

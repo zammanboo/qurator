@@ -7,7 +7,8 @@ from app.schemas.schemas import Category as CategorySchema, CategoryWithContent
 
 router = APIRouter()
 
-@router.get("/", response_model=List[CategorySchema])
+@router.get("", response_model=List[CategorySchema])
+@router.get("/", response_model=List[CategorySchema], include_in_schema=False)
 async def get_categories(
     skip: int = 0,
     limit: int = 100,
@@ -40,7 +41,8 @@ async def get_category_by_slug(slug: str, db: Session = Depends(get_db)):
     return category
 
 
-@router.get("/groups/", response_model=None)
+@router.get("/groups", response_model=None)
+@router.get("/groups/", response_model=None, include_in_schema=False)
 async def get_category_groups(db: Session = Depends(get_db)):
     """Get all active category groups with their categories for sidebar"""
     from app.models.models import CategoryGroup
