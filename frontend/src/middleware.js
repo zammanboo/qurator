@@ -8,10 +8,9 @@ export function middleware(request) {
 
   // Redirect zubu9dan.com to www.zubu9dan.com (permanent redirect)
   if (originalHost === 'zubu9dan.com' || originalHost?.startsWith('zubu9dan.com:')) {
-    const url = new URL(request.url)
-    url.hostname = 'www.zubu9dan.com'
-    url.port = '' // Remove internal port (Firebase uses 8080 internally)
-    return NextResponse.redirect(url.toString(), 301)
+    // Construct URL directly to avoid internal port issues
+    const redirectUrl = `https://www.zubu9dan.com${request.nextUrl.pathname}${request.nextUrl.search}`
+    return NextResponse.redirect(redirectUrl, 301)
   }
 
   return NextResponse.next()
