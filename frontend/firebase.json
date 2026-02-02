@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": ".next",
+    "redirects": [
+      {
+        "source": "**",
+        "destination": "https://www.zubu9dan.com/:splat",
+        "type": 301,
+        "regex": false,
+        "conditions": {
+          "host": "zubu9dan.com"
+        }
+      }
+    ]
+  }
+}
