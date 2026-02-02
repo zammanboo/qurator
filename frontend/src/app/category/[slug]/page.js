@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../../../contexts/AuthContext'
 import { categoriesAPI, contentAPI, adminAPI, groupsAPI } from '../../../services/api'
+import { analytics } from '../../../services/analytics'
 import { toast } from 'react-toastify'
 import { PlusIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 
@@ -25,6 +26,8 @@ export default function CategoryView() {
 
     const handleVideoClick = async (item) => {
         setSelectedVideo(item)
+        analytics.trackContentClick(item.id, item.title, item.category_id)
+
         // Record click only if logged in
         if (user) {
             try {

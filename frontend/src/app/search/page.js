@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../../contexts/AuthContext'
 import { contentAPI } from '../../services/api'
+import { analytics } from '../../services/analytics'
 import { toast } from 'react-toastify'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
@@ -37,6 +38,7 @@ function SearchContent() {
 
     const handleVideoClick = async (item) => {
         setSelectedVideo(item)
+        analytics.trackContentClick(item.id, item.title, item?.category_id)
         if (user) {
             try {
                 await contentAPI.recordClick(item.id)

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 import { categoriesAPI, groupsAPI, contentAPI } from '../services/api'
+import { analytics } from '../services/analytics'
 import { toast } from 'react-toastify'
 import { LockClosedIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import ProtectedRoute from '../components/ProtectedRoute'
@@ -44,6 +45,7 @@ function HomeContent() {
 
   const handleVideoClick = async (item) => {
     setSelectedVideo(item)
+    analytics.trackContentClick(item.id, item.title, item.category_id)
     if (user) {
       try {
         await contentAPI.recordClick(item.id)

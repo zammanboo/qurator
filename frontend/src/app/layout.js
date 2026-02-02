@@ -5,6 +5,8 @@ import Layout from "../components/Layout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { GoogleAnalytics } from '@next/third-parties/google'
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -22,6 +24,7 @@ export default function RootLayout({ children }) {
           </Layout>
           <ToastContainer position="top-right" autoClose={3000} />
         </AuthProvider>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
       </body>
     </html>
   );
