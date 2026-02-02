@@ -7,14 +7,14 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    full_name = Column(String)
-    google_id = Column(String, unique=True, index=True)
-    profile_picture = Column(String)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    full_name = Column(String(255))
+    google_id = Column(String(255), unique=True, index=True)
+    profile_picture = Column(String(512))
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     mfa_enabled = Column(Boolean, default=False)
-    mfa_secret = Column(String, nullable=True)
+    mfa_secret = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -23,10 +23,10 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey("category_groups.id"), nullable=True)
-    name = Column(String, unique=True, nullable=False)
-    slug = Column(String, unique=True, nullable=False, index=True)
+    name = Column(String(255), unique=True, nullable=False)
+    slug = Column(String(255), unique=True, nullable=False, index=True)
     description = Column(Text)
-    icon = Column(String)
+    icon = Column(String(50))
     order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -40,11 +40,11 @@ class ContentItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
-    title = Column(String, nullable=False)
+    title = Column(String(500), nullable=False)
     description = Column(Text)
-    youtube_url = Column(String, nullable=False)
-    youtube_id = Column(String, nullable=False)
-    thumbnail_url = Column(String)
+    youtube_url = Column(String(512), nullable=False)
+    youtube_id = Column(String(50), nullable=False)
+    thumbnail_url = Column(String(512))
     order = Column(Integer, default=0)
     click_count = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
@@ -71,11 +71,11 @@ class CategoryGroup(Base):
     __tablename__ = "category_groups"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False)
-    slug = Column(String, unique=True, nullable=False, index=True)
-    icon = Column(String)
+    name = Column(String(255), unique=True, nullable=False)
+    slug = Column(String(255), unique=True, nullable=False, index=True)
+    icon = Column(String(50))
     order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     categories = relationship("Category", back_populates="group")

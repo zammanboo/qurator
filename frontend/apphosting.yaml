@@ -1,0 +1,11 @@
+runConfig:
+  runtime: nodejs22
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 2
+
+env:
+  - variable: NEXT_PUBLIC_API_URL
+    value: https://qurator-backend-655718178981.asia-northeast3.run.app

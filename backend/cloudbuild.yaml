@@ -1,0 +1,28 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/qurator-backend', '.']
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/qurator-backend']
+
+  # Deploy container image to Cloud Run with Cloud SQL connection
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'qurator-backend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/qurator-backend'
+      - '--region'
+      - 'asia-northeast3'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--add-cloudsql-instances'
+      - 'zubu9dan-1baf2:asia-northeast3:zubu9dan-mysql'
+
+images:
+  - 'gcr.io/$PROJECT_ID/qurator-backend'

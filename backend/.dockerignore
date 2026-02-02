@@ -1,0 +1,45 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.main.py.swp
+
+# Environment files (use Cloud Run secrets instead)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# Database (use Cloud SQL for production)
+*.db
+*.sqlite
+*.sqlite3
+
+# Tests
+tests/
+pytest_cache/
+.pytest_cache/
+
+# Documentation
+*.md
+docs/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
