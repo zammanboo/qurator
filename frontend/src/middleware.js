@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
 
 export function middleware(request) {
+  // Check multiple headers for the original host (Firebase App Hosting uses x-forwarded-host)
+  const forwardedHost = request.headers.get('x-forwarded-host')
   const host = request.headers.get('host')
+  const originalHost = forwardedHost || host
 
   // Redirect zubu9dan.com to www.zubu9dan.com (permanent redirect)
-  if (host === 'zubu9dan.com' || host?.startsWith('zubu9dan.com:')) {
+  if (originalHost === 'zubu9dan.com' || originalHost?.startsWith('zubu9dan.com:')) {
     const url = new URL(request.url)
     url.hostname = 'www.zubu9dan.com'
     return NextResponse.redirect(url.toString(), 301)
