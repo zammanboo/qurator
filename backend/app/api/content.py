@@ -8,7 +8,8 @@ from app.services.auth_service import get_current_user
 
 router = APIRouter()
 
-@router.get("/", response_model=List[ContentItemSchema])
+@router.get("", response_model=List[ContentItemSchema])
+@router.get("/", response_model=List[ContentItemSchema], include_in_schema=False)
 async def get_content_items(
     category_id: int = None,
     skip: int = 0,
