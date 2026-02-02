@@ -3,11 +3,11 @@ import { NextResponse } from 'next/server'
 export function middleware(request) {
   const host = request.headers.get('host')
 
-  // Redirect zubu9dan.com to www.zubu9dan.com
-  if (host === 'zubu9dan.com') {
-    const url = request.nextUrl.clone()
-    url.host = 'www.zubu9dan.com'
-    return NextResponse.redirect(url, 301)
+  // Redirect zubu9dan.com to www.zubu9dan.com (permanent redirect)
+  if (host === 'zubu9dan.com' || host?.startsWith('zubu9dan.com:')) {
+    const url = new URL(request.url)
+    url.hostname = 'www.zubu9dan.com'
+    return NextResponse.redirect(url.toString(), 301)
   }
 
   return NextResponse.next()

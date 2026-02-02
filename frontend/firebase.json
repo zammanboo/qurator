@@ -3,12 +3,13 @@
     "public": ".next",
     "redirects": [
       {
-        "source": "**",
-        "destination": "https://www.zubu9dan.com/:splat",
+        "source": "/:path*",
+        "destination": "https://www.zubu9dan.com/:path*",
         "type": 301,
-        "regex": false,
         "conditions": {
-          "host": "zubu9dan.com"
+          "and": [
+            { "host": ["zubu9dan.com"] }
+          ]
         }
       }
     ]
