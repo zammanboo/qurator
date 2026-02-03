@@ -29,7 +29,8 @@ services:
     environment:
       - PORT=8080
       - DATABASE_URL=mysql+pymysql://qurator:devpassword@db:3306/qurator
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=https://www.zubu9dan.com
+      - GOOGLE_REDIRECT_URI=https://www.zubu9dan.com/api/auth/google/callback
     depends_on:
       db:
         condition: service_healthy
@@ -38,12 +39,12 @@ services:
     build:
       context: ./frontend
       args:
-        - NEXT_PUBLIC_API_URL=http://localhost:3000
+        - NEXT_PUBLIC_API_URL=https://www.zubu9dan.com
     ports:
       - "3000:3000"
     environment:
       - API_PROXY_URL=http://backend:8080
-      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=https://www.zubu9dan.com
     depends_on:
       - backend
 
