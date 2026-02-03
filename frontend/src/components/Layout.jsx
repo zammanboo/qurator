@@ -86,7 +86,7 @@ export default function Layout({ children }) {
                                 </button>
                             )}
 
-                            <Link href="/" className="flex items-center w-64 pl-2">
+                            <Link href="/" className="flex items-center lg:w-64 w-auto pl-2" onClick={() => setSearchQuery('')}>
                                 <img
                                     src="/zubu9dan_logo.png"
                                     alt="주부9단"
@@ -254,7 +254,7 @@ export default function Layout({ children }) {
 
                         <div className="fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-white px-4 pb-6 sm:max-w-sm sm:px-6 sm:ring-1 sm:ring-gray-900/10">
                             <div className="flex items-center justify-between p-4 -mx-4 mb-4 border-b">
-                                <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                                <Link href="/" className="flex items-center" onClick={() => { setMobileMenuOpen(false); setSearchQuery('') }}>
                                     <img
                                         src="/zubu9dan_logo.png"
                                         alt="주부9단"
