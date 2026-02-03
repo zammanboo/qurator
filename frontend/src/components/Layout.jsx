@@ -73,7 +73,7 @@ export default function Layout({ children }) {
                 <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <Link href="/" className="flex items-center w-64">
+                            <Link href="/" className="flex items-center w-64 pl-2">
                                 <img
                                     src="/zubu9dan_logo.png"
                                     alt="주부9단"
