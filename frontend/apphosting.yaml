@@ -8,4 +8,4 @@ runConfig:
 
 env:
   - variable: NEXT_PUBLIC_API_URL
-    value: https://qurator-backend-655718178981.asia-northeast3.run.app
+    value: https://www.zubu9dan.com
