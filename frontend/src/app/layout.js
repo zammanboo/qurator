@@ -10,7 +10,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "zubu9dan",
+  title: "주부9단",
   description: "Content curation platform",
   icons: {
     icon: '/favicon.ico',
