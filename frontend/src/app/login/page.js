@@ -18,9 +18,13 @@ export default function Login() {
     const handleGoogleLogin = async () => {
         try {
             const response = await authAPI.googleLogin()
+            if (!response.data.url) {
+                throw new Error('No login URL received')
+            }
             window.location.href = response.data.url
         } catch (error) {
             console.error('Login failed:', error)
+            toast.error('로그인 시작 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
         }
     }
 

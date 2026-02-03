@@ -1,20 +1,51 @@
 version: '3.8'
 
 services:
-  mysql:
+  db:
     image: mysql:8.0
-    container_name: qurator-mysql
+    command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: qurator
       MYSQL_USER: qurator
-      MYSQL_PASSWORD: qurator123
+      MYSQL_PASSWORD: devpassword
+      MYSQL_ROOT_PASSWORD: rootpassword
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8080"
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=8080
+      - DATABASE_URL=mysql+pymysql://qurator:devpassword@db:3306/qurator
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    environment:
+      - API_PROXY_URL=http://backend:8080
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - backend
 
 volumes:
   mysql_data:
