@@ -17,6 +17,7 @@ from app.core.security import (
 from app.services.auth_service import get_current_user
 from datetime import timedelta
 import httpx
+import urllib.parse
 
 router = APIRouter()
 
@@ -32,9 +33,15 @@ oauth.register(
 @router.get("/google/login")
 async def google_login():
     """Redirect to Google OAuth login"""
-    redirect_uri = settings.GOOGLE_REDIRECT_URI
+    params = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile"
+    }
+    query_string = urllib.parse.urlencode(params)
     return {
-        "url": f"https://accounts.google.com/o/oauth2/v2/auth?client_id={settings.GOOGLE_CLIENT_ID}&redirect_uri={redirect_uri}&response_type=code&scope=openid%20email%20profile"
+        "url": f"https://accounts.google.com/o/oauth2/v2/auth?{query_string}"
     }
 
 @router.get("/google/callback")
