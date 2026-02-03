@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('token')
             setToken(null)
             setUser(null)
-            router.push('/login')
+            router.push('/')
         }
     }
 
