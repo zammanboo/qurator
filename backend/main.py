@@ -7,10 +7,32 @@ from app.api import auth, categories, content, admin, users
 from app.db.database import engine
 from app.models import models
 
-models.Base.metadata.create_all(bind=engine)
+import logging
+from contextlib import asynccontextmanager
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Try to create DB tables
+    try:
+        logger.info("Attempting to connect to database and create tables...")
+        models.Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully.")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {str(e)}")
+        logger.error("Application will start without database connection.")
+        # We don't raise here so the container doesn't crash immediately,
+        # allowing us to see the logs.
+    
+    yield
+    
+    # Shutdown logic (if any) can go here
 
 # Disable automatic trailing slash redirects
-app = FastAPI(title=settings.APP_NAME, redirect_slashes=False)
+app = FastAPI(title=settings.APP_NAME, redirect_slashes=False, lifespan=lifespan)
 
 # CORS configuration - allow multiple origins
 allowed_origins = [
