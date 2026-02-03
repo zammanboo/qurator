@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      - FRONTEND_URL=http://localhost:3000
+      - GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback
+
+  frontend:
+    build:
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3000
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
