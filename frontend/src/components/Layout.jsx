@@ -73,7 +73,7 @@ export default function Layout({ children }) {
                 <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <Link href="/" className="flex items-center">
+                            <Link href="/" className="flex items-center w-64">
                                 <img
                                     src="/zubu9dan_logo.png"
                                     alt="주부9단"
@@ -83,7 +83,7 @@ export default function Layout({ children }) {
 
                             {/* Search Bar - 사이드바 너비에 맞춰 정렬 */}
                             {!isAdminPage && (
-                                <form onSubmit={handleSearch} className="hidden sm:flex items-center ml-4">
+                                <form onSubmit={handleSearch} className="hidden sm:flex items-center">
                                     <div className="relative">
                                         <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                                         <input
