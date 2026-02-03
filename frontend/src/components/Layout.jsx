@@ -73,8 +73,12 @@ export default function Layout({ children }) {
                 <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <Link href="/" className="text-2xl font-bold text-indigo-600 w-56">
-                                Qurator
+                            <Link href="/" className="flex items-center">
+                                <img
+                                    src="/zubu9dan_logo.png"
+                                    alt="주부9단"
+                                    className="h-10 w-auto"
+                                />
                             </Link>
 
                             {/* Search Bar - 사이드바 너비에 맞춰 정렬 */}
@@ -196,8 +200,8 @@ export default function Layout({ children }) {
                                                         key={cat.id}
                                                         href={`/category/${cat.slug}`}
                                                         className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg ${pathname === `/category/${cat.slug}`
-                                                                ? 'bg-indigo-50 text-indigo-600'
-                                                                : 'text-gray-600 hover:bg-gray-50'
+                                                            ? 'bg-indigo-50 text-indigo-600'
+                                                            : 'text-gray-600 hover:bg-gray-50'
                                                             }`}
                                                     >
                                                         <span>{cat.icon}</span>
