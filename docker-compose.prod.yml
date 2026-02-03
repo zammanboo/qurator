@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      - FRONTEND_URL=https://www.zubu9dan.com
+      - GOOGLE_REDIRECT_URI=https://www.zubu9dan.com/api/auth/google/callback
+
+  frontend:
+    build:
+      args:
+        - NEXT_PUBLIC_API_URL=https://www.zubu9dan.com
+    environment:
+      - NEXT_PUBLIC_API_URL=https://www.zubu9dan.com
