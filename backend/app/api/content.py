@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.db.database import get_db
-from app.models.models import ContentItem, ContentClick, User
+from app.models.models import ContentItem, ContentClick, User, Category
 from app.schemas.schemas import ContentItem as ContentItemSchema
 from app.services.auth_service import get_current_user
 
@@ -26,25 +26,64 @@ async def get_content_items(
     return content_items
 
 # IMPORTANT: Static routes must come before dynamic routes
-@router.get("/search/", response_model=List[ContentItemSchema])
+@router.get("/search")
 async def search_content(
     q: str,
     skip: int = 0,
     limit: int = 50,
     db: Session = Depends(get_db)
 ):
-    """Search content items by title or description"""
+    """Search content items and categories by title/name or description"""
     if not q or len(q.strip()) < 1:
         return []
 
     search_term = f"%{q.strip()}%"
-    query = db.query(ContentItem).filter(
+    
+    # Search Content
+    content_query = db.query(ContentItem).filter(
         ContentItem.is_active == True,
         (ContentItem.title.ilike(search_term) | ContentItem.description.ilike(search_term))
     )
-
-    content_items = query.order_by(ContentItem.click_count.desc()).offset(skip).limit(limit).all()
-    return content_items
+    content_items = content_query.order_by(ContentItem.click_count.desc()).all()
+    
+    # Search Categories
+    category_query = db.query(Category).filter(
+        Category.is_active == True,
+        (Category.name.ilike(search_term) | Category.description.ilike(search_term))
+    )
+    categories = category_query.all()
+    
+    results = []
+    
+    # Format Categories
+    for cat in categories:
+        results.append({
+            "type": "category",
+            "id": cat.id,
+            "name": cat.name,
+            "slug": cat.slug,
+            "description": cat.description,
+            "icon": cat.icon,
+            "group_id": cat.group_id
+        })
+        
+    # Format Content
+    for item in content_items:
+        results.append({
+            "type": "content",
+            "id": item.id,
+            "title": item.title,
+            "description": item.description,
+            "youtube_id": item.youtube_id,
+            "thumbnail_url": item.thumbnail_url,
+            "click_count": item.click_count,
+            "category_id": item.category_id
+        })
+    
+    # Simple pagination on the combined list
+    start = skip
+    end = skip + limit
+    return results[start:end]
 
 @router.get("/user/history")
 async def get_user_click_history(

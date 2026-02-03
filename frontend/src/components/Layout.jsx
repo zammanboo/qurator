@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 import { Menu } from '@headlessui/react'
-import { UserCircleIcon, ArrowRightOnRectangleIcon, ChevronDownIcon, ChevronRightIcon, ClockIcon, LockClosedIcon, MagnifyingGlassIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
+import { UserCircleIcon, ArrowRightOnRectangleIcon, ChevronDownIcon, ChevronRightIcon, ClockIcon, LockClosedIcon, MagnifyingGlassIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { groupsAPI } from '../services/api'
 
 export default function Layout({ children }) {
@@ -15,6 +15,7 @@ export default function Layout({ children }) {
     const [groups, setGroups] = useState([])
     const [expandedGroups, setExpandedGroups] = useState({})
     const [searchQuery, setSearchQuery] = useState('')
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     // Determine if we should show the full layout (sidebar + navbar)
     const isAuthPage = pathname === '/login' || pathname === '/auth/callback'
@@ -73,6 +74,18 @@ export default function Layout({ children }) {
                 <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
+                            {/* Mobile Menu Button */}
+                            {!isAdminPage && (
+                                <button
+                                    type="button"
+                                    className="lg:hidden -ml-2 mr-2 p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100"
+                                    onClick={() => setMobileMenuOpen(true)}
+                                >
+                                    <span className="sr-only">Open menu</span>
+                                    <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+                                </button>
+                            )}
+
                             <Link href="/" className="flex items-center w-64 pl-2">
                                 <img
                                     src="/zubu9dan_logo.png"
@@ -173,7 +186,7 @@ export default function Layout({ children }) {
             <div className="flex pt-16">
                 {/* Sidebar - only show on non-admin pages */}
                 {!isAdminPage && groups.length > 0 && (
-                    <aside className="w-64 bg-white shadow-sm min-h-[calc(100vh-4rem)] fixed left-0 top-16 overflow-y-auto">
+                    <aside className="hidden lg:block w-64 bg-white shadow-sm min-h-[calc(100vh-4rem)] fixed left-0 top-16 overflow-y-auto">
                         <div className="p-4">
                             <h2 className="text-lg font-semibold text-gray-900 mb-4">카테고리</h2>
                             <nav className="space-y-1">
@@ -233,8 +246,106 @@ export default function Layout({ children }) {
                     </aside>
                 )}
 
+                {/* Mobile Sidebar (Drawer) */}
+                {!isAdminPage && groups.length > 0 && mobileMenuOpen && (
+                    <div className="relative z-50 lg:hidden" role="dialog" aria-modal="true">
+                        {/* Backdrop */}
+                        <div className="fixed inset-0 bg-gray-900/50" aria-hidden="true" onClick={() => setMobileMenuOpen(false)}></div>
+
+                        <div className="fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-white px-4 pb-6 sm:max-w-sm sm:px-6 sm:ring-1 sm:ring-gray-900/10">
+                            <div className="flex items-center justify-between p-4 -mx-4 mb-4 border-b">
+                                <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                                    <img
+                                        src="/zubu9dan_logo.png"
+                                        alt="주부9단"
+                                        className="h-8 w-auto"
+                                    />
+                                </Link>
+                                <button
+                                    type="button"
+                                    className="-m-2.5 rounded-md p-2.5 text-gray-700"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span className="sr-only">Close menu</span>
+                                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                                </button>
+                            </div>
+
+                            {/* Mobile Nav Content - Same as Desktop */}
+                            <nav className="space-y-1">
+                                {visibleGroups.map((group) => (
+                                    <div key={group.id || 'ungrouped'}>
+                                        <button
+                                            onClick={() => toggleGroup(group.id)}
+                                            className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg"
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                <span>{group.icon}</span>
+                                                <span>{group.name}</span>
+                                            </span>
+                                            {expandedGroups[group.id] ? (
+                                                <ChevronDownIcon className="w-4 h-4" />
+                                            ) : (
+                                                <ChevronRightIcon className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                        {expandedGroups[group.id] && (
+                                            <div className="ml-4 mt-1 space-y-1">
+                                                {group.categories.map((cat) => (
+                                                    <Link
+                                                        key={cat.id}
+                                                        href={`/category/${cat.slug}`}
+                                                        onClick={() => setMobileMenuOpen(false)}
+                                                        className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg ${pathname === `/category/${cat.slug}`
+                                                            ? 'bg-indigo-50 text-indigo-600'
+                                                            : 'text-gray-600 hover:bg-gray-50'
+                                                            }`}
+                                                    >
+                                                        <span>{cat.icon}</span>
+                                                        <span>{cat.name}</span>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+
+                                {!user && groups.length > 1 && (
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <div className="px-3 py-2 text-sm text-gray-400 flex items-center gap-2">
+                                            <LockClosedIcon className="w-4 h-4" />
+                                            <span>+{groups.length - 1}개 그룹</span>
+                                        </div>
+                                        <Link
+                                            href="/login"
+                                            className="block px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                                        >
+                                            로그인하여 모두 보기 →
+                                        </Link>
+                                    </div>
+                                )}
+                            </nav>
+                        </div>
+                    </div>
+                )}
+
                 {/* Main content */}
-                <main className={`flex-1 px-4 sm:px-6 lg:px-8 py-8 ${!isAdminPage && groups.length > 0 ? 'ml-64' : ''}`}>
+                <main className={`flex-1 px-4 sm:px-6 lg:px-8 py-8 ${!isAdminPage && groups.length > 0 ? 'lg:ml-64' : ''}`}>
+                    {/* Mobile Search Bar */}
+                    {!isAdminPage && (
+                        <form onSubmit={handleSearch} className="block sm:hidden mb-4">
+                            <div className="relative">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="콘텐츠 검색..."
+                                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                                />
+                            </div>
+                        </form>
+                    )}
                     {children}
                 </main>
             </div>

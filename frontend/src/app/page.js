@@ -126,7 +126,7 @@ function HomeContent() {
           <div className="mb-8">
             <div className="flex items-center gap-3">
               <MagnifyingGlassIcon className="w-8 h-8 text-indigo-600" />
-              <h1 className="text-3xl font-bold text-gray-900">검색결과</h1>
+              <h1 className="text-2xl font-bold text-gray-900">검색결과</h1>
             </div>
             <p className="mt-2 text-gray-600">
               "{searchQuery}" 검색 결과 {searchResults.length}개
@@ -140,38 +140,66 @@ function HomeContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {searchResults.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer"
-                  onClick={() => handleVideoClick(item)}
-                >
-                  <div className="relative pt-[56.25%]">
-                    <img
-                      src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_id}/mqdefault.jpg`}
-                      alt={item.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition flex items-center justify-center">
-                      <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center opacity-80">
-                        <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
+              {searchResults.map((item) => {
+                if (item.type === 'category') {
+                  return (
+                    <Link
+                      key={`cat-${item.id}`}
+                      href={`/category/${item.slug}`}
+                      className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                    >
+                      <div className="flex items-center mb-4">
+                        {item.icon && (
+                          <span className="text-4xl mr-4">{item.icon}</span>
+                        )}
+                        <h2 className="text-lg font-semibold text-gray-900">
+                          {item.name}
+                        </h2>
+                      </div>
+                      {item.description && (
+                        <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                      )}
+                      <div className="mt-4 text-xs text-indigo-600 font-medium">
+                        카테고리
+                      </div>
+                    </Link>
+                  )
+                }
+
+                // Default to content rendering
+                return (
+                  <div
+                    key={`content-${item.id}`}
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer"
+                    onClick={() => handleVideoClick(item)}
+                  >
+                    <div className="relative pt-[56.25%]">
+                      <img
+                        src={item.thumbnail_url || `https://img.youtube.com/vi/${item.youtube_id}/mqdefault.jpg`}
+                        alt={item.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition flex items-center justify-center">
+                        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center opacity-80">
+                          <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{item.title}</h3>
+                      <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
+                        <span>{item.click_count || 0} views</span>
                       </div>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-medium text-gray-900 line-clamp-2">{item.title}</h3>
-                    <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span>{item.click_count || 0} views</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
@@ -190,7 +218,7 @@ function HomeContent() {
                 </div>
                 <button
                   onClick={() => router.push('/login')}
-                  className="px-6 py-2 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition"
+                  className="px-6 py-2 bg-white text-indigo-600 text-sm font-semibold rounded-lg hover:bg-indigo-50 transition"
                 >
                   로그인하기
                 </button>
@@ -199,8 +227,8 @@ function HomeContent() {
           )}
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Content Categories</h1>
-            <p className="mt-2 text-gray-600">
+            <h1 className="text-xl font-bold text-gray-900">Content Categories</h1>
+            <p className="mt-2 text-sm text-gray-600">
               {user
                 ? `Explore curated YouTube content across ${categories.length} categories`
                 : `${firstGroup?.name || ''}의 콘텐츠를 둘러보세요`
@@ -219,12 +247,12 @@ function HomeContent() {
                   {category.icon && (
                     <span className="text-4xl mr-4">{category.icon}</span>
                   )}
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-gray-900">
                     {category.name}
                   </h2>
                 </div>
                 {category.description && (
-                  <p className="text-gray-600">{category.description}</p>
+                  <p className="text-sm text-gray-600">{category.description}</p>
                 )}
               </Link>
             ))}
