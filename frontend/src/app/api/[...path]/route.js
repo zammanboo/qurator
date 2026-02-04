@@ -29,6 +29,14 @@ async function proxy(request) {
             redirect: 'manual'  // Don't follow redirects, pass them to client
         });
 
+        // Handle redirect responses
+        if (response.status >= 300 && response.status < 400) {
+            const location = response.headers.get('location');
+            if (location) {
+                return NextResponse.redirect(location, response.status);
+            }
+        }
+
         // Copy content from backend response
         const data = await response.blob();
         const responseHeaders = new Headers(response.headers);
