@@ -25,7 +25,8 @@ async function proxy(request) {
             headers: headers,
             body: body,
             // standard, cors, etc. handled by backend usually, but nextjs fetch defaults might need tweaking
-            cache: 'no-store'
+            cache: 'no-store',
+            redirect: 'manual'  // Don't follow redirects, pass them to client
         });
 
         // Copy content from backend response
