@@ -79,3 +79,13 @@ class CategoryGroup(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     categories = relationship("Category", back_populates="group")
+
+
+class SiteSettings(Base):
+    __tablename__ = "site_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(100), unique=True, nullable=False, index=True)
+    value = Column(String(500), nullable=False)
+    description = Column(String(255))
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())

@@ -142,3 +142,20 @@ class CategoryGroup(CategoryGroupBase):
 
 class CategoryGroupWithCategories(CategoryGroup):
     categories: List['Category'] = []
+
+
+# Site Settings Schemas
+class SiteSettingsBase(BaseModel):
+    key: str
+    value: str
+    description: Optional[str] = None
+
+class SiteSettingsUpdate(BaseModel):
+    value: str
+
+class SiteSettings(SiteSettingsBase):
+    id: int
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True

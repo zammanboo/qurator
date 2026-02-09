@@ -4,7 +4,7 @@ from sqlalchemy import func
 from typing import List
 from pydantic import BaseModel
 from app.db.database import get_db
-from app.models.models import User, Category, ContentItem, ContentClick, CategoryGroup
+from app.models.models import User, Category, ContentItem, ContentClick, CategoryGroup, SiteSettings
 from app.schemas.schemas import (
     User as UserSchema,
     Category as CategorySchema,
@@ -489,3 +489,53 @@ async def reorder_groups(
             group.order = item["order"]
     db.commit()
     return {"message": "Groups reordered"}
+
+
+# Site Settings Management
+@router.get("/settings")
+async def get_all_settings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Get all site settings (admin only)"""
+    settings = db.query(SiteSettings).all()
+    return {s.key: {"value": s.value, "description": s.description} for s in settings}
+
+
+@router.get("/settings/{key}")
+async def get_setting(
+    key: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Get a specific setting by key"""
+    setting = db.query(SiteSettings).filter(SiteSettings.key == key).first()
+    if not setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    return {"key": setting.key, "value": setting.value, "description": setting.description}
+
+
+@router.put("/settings/{key}")
+async def update_setting(
+    key: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    """Update or create a site setting"""
+    data = await request.json()
+    value = data.get("value")
+    description = data.get("description")
+
+    setting = db.query(SiteSettings).filter(SiteSettings.key == key).first()
+    if setting:
+        setting.value = value
+        if description is not None:
+            setting.description = description
+    else:
+        setting = SiteSettings(key=key, value=value, description=description)
+        db.add(setting)
+
+    db.commit()
+    db.refresh(setting)
+    return {"key": setting.key, "value": setting.value, "description": setting.description}

@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
-import { categoriesAPI, groupsAPI, contentAPI } from '../services/api'
+import { categoriesAPI, groupsAPI, contentAPI, settingsAPI } from '../services/api'
 import { analytics } from '../services/analytics'
 import { toast } from 'react-toastify'
 import { LockClosedIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
@@ -21,6 +21,7 @@ function HomeContent() {
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedVideo, setSelectedVideo] = useState(null)
+  const [allowGuestFullAccess, setAllowGuestFullAccess] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -57,12 +58,14 @@ function HomeContent() {
 
   const fetchData = async () => {
     try {
-      const [catResponse, groupResponse] = await Promise.all([
+      const [catResponse, groupResponse, settingsResponse] = await Promise.all([
         categoriesAPI.getAll(),
-        groupsAPI.getAll()
+        groupsAPI.getAll(),
+        settingsAPI.getPublic()
       ])
       setCategories(catResponse.data)
       setGroups(groupResponse.data)
+      setAllowGuestFullAccess(settingsResponse.data?.allow_guest_full_access === 'true')
     } catch (error) {
       toast.error('Failed to load categories')
       console.error(error)
@@ -71,10 +74,10 @@ function HomeContent() {
     }
   }
 
-  // 비로그인 시 첫 번째 그룹의 카테고리만 표시
+  // 비로그인 시 첫 번째 그룹의 카테고리만 표시 (설정에 따라 전체 공개 가능)
   const firstGroup = groups[0]
   const allowedCategoryIds = firstGroup?.categories?.map(c => c.id) || []
-  const visibleCategories = user
+  const visibleCategories = (user || allowGuestFullAccess)
     ? categories
     : categories.filter(c => allowedCategoryIds.includes(c.id))
 
@@ -205,8 +208,8 @@ function HomeContent() {
         </div>
       ) : (
         <>
-          {/* 비로그인 안내 배너 */}
-          {!user && (
+          {/* 비로그인 안내 배너 (전체 공개가 아닐 때만 표시) */}
+          {!user && !allowGuestFullAccess && (
             <div className="mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
@@ -229,7 +232,7 @@ function HomeContent() {
           <div className="mb-8">
             <h1 className="text-xl font-bold text-gray-900">Content Categories</h1>
             <p className="mt-2 text-sm text-gray-600">
-              {user
+              {(user || allowGuestFullAccess)
                 ? `Explore curated YouTube content across ${categories.length} categories`
                 : `${firstGroup?.name || ''}의 콘텐츠를 둘러보세요`
               }
@@ -264,8 +267,8 @@ function HomeContent() {
             </div>
           )}
 
-          {/* 비로그인 시 추가 콘텐츠 있음 표시 */}
-          {!user && categories.length > visibleCategories.length && (
+          {/* 비로그인 시 추가 콘텐츠 있음 표시 (전체 공개가 아닐 때만 표시) */}
+          {!user && !allowGuestFullAccess && categories.length > visibleCategories.length && (
             <div className="mt-8 text-center">
               <div className="inline-flex items-center gap-2 text-gray-500 bg-gray-100 px-4 py-2 rounded-full">
                 <LockClosedIcon className="w-4 h-4" />

@@ -32,7 +32,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('token')
-                window.location.href = '/login'
+                window.location.href = '/'
             }
         }
         return Promise.reject(error)
@@ -70,6 +70,10 @@ export const groupsAPI = {
     getAll: () => api.get('/api/categories/groups/'),
 }
 
+export const settingsAPI = {
+    getPublic: () => api.get('/api/categories/settings/public/'),
+}
+
 export const adminAPI = {
     // Users
     getUsers: () => api.get('/api/admin/users'),
@@ -103,6 +107,10 @@ export const adminAPI = {
     deleteGroup: (id) => api.delete(`/api/admin/groups/${id}`),
     toggleGroupActive: (id) => api.patch(`/api/admin/groups/${id}/toggle-active`),
     reorderGroups: (orders) => api.post('/api/admin/groups/reorder', orders),
+
+    // Site Settings
+    getSettings: () => api.get('/api/admin/settings'),
+    updateSetting: (key, value, description) => api.put(`/api/admin/settings/${key}`, { value, description }),
 }
 
 export default api

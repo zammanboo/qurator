@@ -9,7 +9,8 @@ import {
     FolderIcon,
     PlayCircleIcon,
     ClockIcon,
-    RectangleStackIcon
+    RectangleStackIcon,
+    Cog6ToothIcon
 } from '@heroicons/react/24/outline'
 
 export default function AdminLayout({ children }) {
@@ -21,6 +22,7 @@ export default function AdminLayout({ children }) {
         { path: '/admin/categories', label: 'Categories', icon: FolderIcon },
         { path: '/admin/content', label: 'Content', icon: PlayCircleIcon },
         { path: '/admin/history', label: 'User History', icon: ClockIcon },
+        { path: '/admin/settings', label: 'Settings', icon: Cog6ToothIcon },
     ]
 
     return (

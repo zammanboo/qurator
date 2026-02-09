@@ -2,10 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.db.database import get_db
-from app.models.models import Category
+from app.models.models import Category, SiteSettings
 from app.schemas.schemas import Category as CategorySchema, CategoryWithContent
 
 router = APIRouter()
+
+
+@router.get("/settings/public", response_model=None)
+@router.get("/settings/public/", response_model=None, include_in_schema=False)
+async def get_public_settings(db: Session = Depends(get_db)):
+    """Get public site settings (no auth required)"""
+    public_keys = ["allow_guest_full_access"]
+    settings = db.query(SiteSettings).filter(SiteSettings.key.in_(public_keys)).all()
+    return {s.key: s.value for s in settings}
 
 @router.get("", response_model=List[CategorySchema])
 @router.get("/", response_model=List[CategorySchema], include_in_schema=False)
