@@ -58,14 +58,21 @@ function HomeContent() {
 
   const fetchData = async () => {
     try {
-      const [catResponse, groupResponse, settingsResponse] = await Promise.all([
+      const [catResponse, groupResponse] = await Promise.all([
         categoriesAPI.getAll(),
-        groupsAPI.getAll(),
-        settingsAPI.getPublic()
+        groupsAPI.getAll()
       ])
       setCategories(catResponse.data)
       setGroups(groupResponse.data)
-      setAllowGuestFullAccess(settingsResponse.data?.allow_guest_full_access === 'true')
+
+      // Settings 로드는 별도로 처리 (실패해도 기본값 사용)
+      try {
+        const settingsResponse = await settingsAPI.getPublic()
+        setAllowGuestFullAccess(settingsResponse.data?.allow_guest_full_access === 'true')
+      } catch (settingsError) {
+        console.error('Failed to load settings:', settingsError)
+        // 기본값 false 유지
+      }
     } catch (error) {
       toast.error('Failed to load categories')
       console.error(error)

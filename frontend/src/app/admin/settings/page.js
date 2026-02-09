@@ -16,9 +16,11 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
         try {
             const response = await adminAPI.getSettings()
-            setSettings(response.data)
+            setSettings(response.data || {})
         } catch (err) {
-            toast.error('Failed to fetch settings')
+            console.error('Failed to fetch settings:', err)
+            toast.error('Failed to fetch settings: ' + (err.response?.data?.detail || err.message))
+            setSettings({})
         } finally {
             setLoading(false)
         }
