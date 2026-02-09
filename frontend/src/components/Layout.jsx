@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 import { Menu } from '@headlessui/react'
 import { UserCircleIcon, ArrowRightOnRectangleIcon, ChevronDownIcon, ChevronRightIcon, ClockIcon, LockClosedIcon, MagnifyingGlassIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import { groupsAPI } from '../services/api'
+import { groupsAPI, settingsAPI } from '../services/api'
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth()
@@ -16,6 +16,7 @@ export default function Layout({ children }) {
     const [expandedGroups, setExpandedGroups] = useState({})
     const [searchQuery, setSearchQuery] = useState('')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [allowGuestFullAccess, setAllowGuestFullAccess] = useState(false)
 
     // Determine if we should show the full layout (sidebar + navbar)
     const isAuthPage = pathname === '/login' || pathname === '/auth/callback'
@@ -38,6 +39,14 @@ export default function Layout({ children }) {
         } catch (err) {
             console.error('Failed to fetch groups', err)
         }
+
+        // Settings 로드 (실패해도 기본값 사용)
+        try {
+            const settingsResponse = await settingsAPI.getPublic()
+            setAllowGuestFullAccess(settingsResponse.data?.allow_guest_full_access === 'true')
+        } catch (err) {
+            console.error('Failed to fetch settings', err)
+        }
     }
 
     // If it's an auth page, just render children without layout wrapper
@@ -45,8 +54,8 @@ export default function Layout({ children }) {
         return children
     }
 
-    // 비로그인 시 첫 번째 그룹만 표시
-    const visibleGroups = user ? groups : groups.slice(0, 1)
+    // 비로그인 시 첫 번째 그룹만 표시 (설정에 따라 전체 공개 가능)
+    const visibleGroups = (user || allowGuestFullAccess) ? groups : groups.slice(0, 1)
 
     const toggleGroup = (groupId) => {
         setExpandedGroups(prev => ({
@@ -226,8 +235,8 @@ export default function Layout({ children }) {
                                     </div>
                                 ))}
 
-                                {/* 비로그인 시 잠긴 그룹 표시 */}
-                                {!user && groups.length > 1 && (
+                                {/* 비로그인 시 잠긴 그룹 표시 (전체 공개가 아닐 때만) */}
+                                {!user && !allowGuestFullAccess && groups.length > 1 && (
                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                         <div className="px-3 py-2 text-sm text-gray-400 flex items-center gap-2">
                                             <LockClosedIcon className="w-4 h-4" />
@@ -310,7 +319,7 @@ export default function Layout({ children }) {
                                     </div>
                                 ))}
 
-                                {!user && groups.length > 1 && (
+                                {!user && !allowGuestFullAccess && groups.length > 1 && (
                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                         <div className="px-3 py-2 text-sm text-gray-400 flex items-center gap-2">
                                             <LockClosedIcon className="w-4 h-4" />
